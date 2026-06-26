@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG Document Assistant</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #0f172a;
+            color: #e2e8f0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            color: #7dd3fc;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            margin-bottom: 40px;
+            font-size: 0.95rem;
+        }
+
+        .chat-box {
+            width: 100%;
+            max-width: 780px;
+            background: #1e293b;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+
+        .input-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 14px 18px;
+            border-radius: 10px;
+            border: 1px solid #334155;
+            background: #0f172a;
+            color: #e2e8f0;
+            font-size: 1rem;
+            outline: none;
+            transition: border 0.2s;
+        }
+
+        input[type="text"]:focus {
+            border-color: #7dd3fc;
+        }
+
+        button {
+            padding: 14px 24px;
+            background: #0ea5e9;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        button:hover { background: #0284c7; }
+        button:disabled { background: #334155; cursor: not-allowed; }
+
+        .result { display: none; }
+
+        .answer-box {
+            background: #0f172a;
+            border-left: 4px solid #0ea5e9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            line-height: 1.7;
+            font-size: 0.97rem;
+        }
+
+        .sources-title {
+            font-size: 0.85rem;
+            color: #7dd3fc;
+            font-weight: 600;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .source-tag {
+            display: inline-block;
+            background: #1e3a5f;
+            color: #7dd3fc;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.82rem;
+            margin: 4px 4px 4px 0;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            color: #94a3b8;
+            padding: 20px;
+            font-size: 0.9rem;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #334155;
+            border-top-color: #0ea5e9;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error {
+            color: #f87171;
+            background: #1e1e2e;
+            padding: 12px 16px;
+            border-radius: 8px;
+            display: none;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+    <h1>📄 RAG Document Assistant</h1>
+    <p class="subtitle">Ask questions about your documents — powered by Hybrid Search + Reranking</p>
+
+    <div class="chat-box">
+        <div class="input-row">
+            <input type="text" id="question" placeholder="Ask a question about your document..." />
+            <button id="askBtn" onclick="askQuestion()">Ask</button>
+        </div>
+
+        <div class="loading" id="loading">
+            <span class="spinner"></span> Searching and generating answer...
+        </div>
+
+        <div class="error" id="error"></div>
+
+        <div class="result" id="result">
+            <div class="answer-box" id="answer"></div>
+            <div class="sources-title">📌 Sources</div>
+            <div id="sources"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("question").addEventListener("keypress", function(e) {
+            if (e.key === "Enter") askQuestion();
+        });
+
+        async function askQuestion() {
+            const question = document.getElementById("question").value.trim();
+            if (!question) return;
+
+            const btn = document.getElementById("askBtn");
+            btn.disabled = true;
+            document.getElementById("loading").style.display = "block";
+            document.getElementById("result").style.display = "none";
+            document.getElementById("error").style.display = "none";
+
+            try {
+                const response = await fetch("/ask", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ question })
+                });
+
+                const data = await response.json();
+
+                document.getElementById("answer").textContent = data.answer;
+
+                const sourcesDiv = document.getElementById("sources");
+                sourcesDiv.innerHTML = "";
+                data.sources.forEach(src => {
+                    const tag = document.createElement("span");
+                    tag.className = "source-tag";
+                    tag.textContent = src;
+                    sourcesDiv.appendChild(tag);
+                });
+
+                document.getElementById("result").style.display = "block";
+            } catch (err) {
+                document.getElementById("error").textContent = "Something went wrong. Is the server running?";
+                document.getElementById("error").style.display = "block";
+            } finally {
+                document.getElementById("loading").style.display = "none";
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

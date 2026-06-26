@@ -1,6 +1,3 @@
-from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
-from pydantic import BaseModel
 from langchain_chroma import Chroma
 from langchain_core.embeddings import Embeddings
 from google import genai
@@ -13,9 +10,7 @@ from dotenv import load_dotenv
 load_dotenv()
 API_KEY = os.getenv("GEMINI_API_KEY")
 
-app = FastAPI(title="Production RAG API")
-
-
+# Gemini Embeddings wrapper
 class GeminiEmbeddings(Embeddings):
     def __init__(self, api_key: str):
         self.client = genai.Client(api_key=api_key)
@@ -34,25 +29,27 @@ class GeminiEmbeddings(Embeddings):
         )
         return result.embeddings[0].values
 
+# Load ChromaDB
 embeddings = GeminiEmbeddings(api_key=API_KEY)
-vectordb = Chroma(persist_directory="./chroma_db", embedding_function=embeddings)
+vectordb = Chroma(
+    persist_directory="./chroma_db",
+    embedding_function=embeddings
+)
+
+# Load all chunks for BM25
 all_docs = vectordb.get()
 all_texts = all_docs["documents"]
 all_metadatas = all_docs["metadatas"]
+
+# Build BM25 index
 tokenized_corpus = [doc.lower().split() for doc in all_texts]
 bm25 = BM25Okapi(tokenized_corpus)
+
+# Load reranker
 reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
-gemini_client = genai.Client(api_key=API_KEY)
-
-class QuestionRequest(BaseModel):
-    question: str
-
-class AnswerResponse(BaseModel):
-    question: str
-    answer: str
-    sources: List[str]
 
 def hybrid_search(question: str, top_k: int = 20) -> list:
+    # BM25 search
     tokenized_query = question.lower().split()
     bm25_scores = bm25.get_scores(tokenized_query)
     top_bm25_indices = sorted(
@@ -60,12 +57,17 @@ def hybrid_search(question: str, top_k: int = 20) -> list:
         key=lambda i: bm25_scores[i],
         reverse=True
     )[:top_k]
+
+    # Vector search
     vector_results = vectordb.similarity_search(question, k=top_k)
     vector_texts = set([doc.page_content for doc in vector_results])
+
+    # Combine results
     combined = list(vector_texts)
     for i in top_bm25_indices:
         if all_texts[i] not in combined:
             combined.append(all_texts[i])
+
     return combined[:top_k]
 
 def rerank(question: str, chunks: list, top_n: int = 5) -> list:
@@ -74,48 +76,47 @@ def rerank(question: str, chunks: list, top_n: int = 5) -> list:
     ranked = sorted(zip(scores, chunks), reverse=True)
     return [chunk for _, chunk in ranked[:top_n]]
 
-def get_metadata(text: str) -> dict:
+def get_metadata_for_chunk(text: str) -> dict:
     for i, doc_text in enumerate(all_texts):
         if doc_text == text:
             return all_metadatas[i]
     return {}
 
-@app.get("/ui", response_class=HTMLResponse)
-def ui():
-    with open("templates/index.html", "r", encoding="utf-8") as f:
-        return f.read()
+# --- Main RAG flow ---
+question = "How does multi-head attention work?"
 
-@app.get("/")
-def root():
-    return {"message": "Production RAG API is running!"}
+print("🔍 Running hybrid search...")
+candidates = hybrid_search(question, top_k=20)
 
-@app.post("/ask", response_model=AnswerResponse)
-def ask(request: QuestionRequest):
-    candidates = hybrid_search(request.question)
-    top_chunks = rerank(request.question, candidates)
-    context = "\n\n".join(top_chunks)
-    prompt = f"""Answer the question using ONLY the context below.
+print("📊 Reranking...")
+top_chunks = rerank(question, candidates, top_n=5)
+
+# Build context
+context = "\n\n".join(top_chunks)
+
+# Build prompt
+prompt = f"""Answer the question using ONLY the context below.
 If the answer is not in the context, say "I don't have enough information."
 
 Context:
 {context}
 
 Question:
-{request.question}
+{question}
 """
-    response = gemini_client.models.generate_content(
-        model="models/gemini-2.5-flash",
-        contents=prompt
-    )
-    sources = []
-    for chunk in top_chunks:
-        meta = get_metadata(chunk)
-        if meta:
-            source = f"Page {meta.get('page', 0) + 1} of {meta.get('source', 'document.pdf')}"
-            if source not in sources:
-                sources.append(source)
-    return AnswerResponse(
-        question=request.question,
-        answer=response.text,
-        sources=sources
-    )
+
+# Generate answer
+client = genai.Client(api_key=API_KEY)
+response = client.models.generate_content(
+    model="models/gemini-2.5-flash",
+    contents=prompt
+)
+
+print("\n=== ANSWER ===")
+print(response.text)
+
+print("\n=== SOURCES ===")
+for chunk in top_chunks:
+    meta = get_metadata_for_chunk(chunk)
+    if meta:
+        print(f"- Page {meta.get('page', 0) + 1} of {meta.get('source', 'document.pdf')}")
