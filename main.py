@@ -36,11 +36,18 @@ class GeminiEmbeddings(Embeddings):
 
 embeddings = GeminiEmbeddings(api_key=API_KEY)
 vectordb = Chroma(persist_directory="./chroma_db", embedding_function=embeddings)
+
 all_docs = vectordb.get()
-all_texts = all_docs["documents"]
-all_metadatas = all_docs["metadatas"]
-tokenized_corpus = [doc.lower().split() for doc in all_texts]
-bm25 = BM25Okapi(tokenized_corpus)
+
+all_texts = all_docs.get("documents", [])
+all_metadatas = all_docs.get("metadatas", [])
+
+if all_texts:
+    tokenized_corpus = [doc.lower().split() for doc in all_texts]
+    bm25 = BM25Okapi(tokenized_corpus)
+else:
+    bm25 = None
+
 reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
 gemini_client = genai.Client(api_key=API_KEY)
 
@@ -52,20 +59,29 @@ class AnswerResponse(BaseModel):
     answer: str
     sources: List[str]
 
-def hybrid_search(question: str, top_k: int = 20) -> list:
+def hybrid_search(question: str, top_k: int = 20):
+    vector_results = vectordb.similarity_search(question, k=top_k)
+
+    vector_texts = [doc.page_content for doc in vector_results]
+
+    if bm25 is None:
+        return vector_texts
+
     tokenized_query = question.lower().split()
     bm25_scores = bm25.get_scores(tokenized_query)
+
     top_bm25_indices = sorted(
         range(len(bm25_scores)),
         key=lambda i: bm25_scores[i],
         reverse=True
     )[:top_k]
-    vector_results = vectordb.similarity_search(question, k=top_k)
-    vector_texts = set([doc.page_content for doc in vector_results])
+
     combined = list(vector_texts)
+
     for i in top_bm25_indices:
         if all_texts[i] not in combined:
             combined.append(all_texts[i])
+
     return combined[:top_k]
 
 def rerank(question: str, chunks: list, top_n: int = 5) -> list:
