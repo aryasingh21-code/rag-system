@@ -15,17 +15,35 @@ API_KEY = os.getenv("GEMINI_API_KEY")
 
 app = FastAPI(title="Production RAG API")
 
+import yaml
+
+# Load prompt config
+with open("prompts/retrieval_v1.yaml", "r") as f:
+    prompt_config = yaml.safe_load(f)
+
+PROMPT_TEMPLATE = prompt_config["user_prompt_template"]
+MODEL = prompt_config["parameters"]["model"]
+TOP_K = prompt_config["parameters"]["top_k_retrieval"]
+TOP_N = prompt_config["parameters"]["top_n_rerank"]
 
 class GeminiEmbeddings(Embeddings):
     def __init__(self, api_key: str):
         self.client = genai.Client(api_key=api_key)
 
     def embed_documents(self, texts: List[str]) -> List[List[float]]:
-        result = self.client.models.embed_content(
-            model="models/gemini-embedding-001",
-            contents=texts
-        )
-        return [e.values for e in result.embeddings]
+        import time
+        all_embeddings = []
+        batch_size = 20
+        for i in range(0, len(texts), batch_size):
+            batch = texts[i:i + batch_size]
+            result = self.client.models.embed_content(
+                model="models/gemini-embedding-001",
+                contents=batch
+            )
+            all_embeddings.extend([e.values for e in result.embeddings])
+            print(f"Embedded {min(i + batch_size, len(texts))}/{len(texts)} chunks...")
+            time.sleep(35)
+        return all_embeddings
 
     def embed_query(self, text: str) -> List[float]:
         result = self.client.models.embed_content(
@@ -45,13 +63,27 @@ vectordb = Chroma(persist_directory=chroma_path, embedding_function=embeddings)
 existing = vectordb.get()
 
 if not existing["documents"]:
-    print("ChromaDB is empty — building from document.pdf...")
-    loader = PyPDFLoader("document.pdf")
-    docs = loader.load()
-    splitter = RecursiveCharacterTextSplitter(chunk_size=700, chunk_overlap=100)
-    chunks = splitter.split_documents(docs)
-    vectordb = Chroma.from_documents(chunks, embeddings, persist_directory=chroma_path)
-    print("Done! ChromaDB built.")
+    print("ChromaDB is empty — building from all PDFs in documents/...")
+    all_chunks = []
+    pdf_folder = "./documents"
+    for filename in os.listdir(pdf_folder):
+        if filename.endswith(".pdf"):
+            print(f"Loading {filename}...")
+            loader = PyPDFLoader(os.path.join(pdf_folder, filename))
+            docs = loader.load()
+            splitter = RecursiveCharacterTextSplitter(
+                chunk_size=700,
+                chunk_overlap=100
+            )
+            chunks = splitter.split_documents(docs)
+            all_chunks.extend(chunks)
+            print(f"  → {len(chunks)} chunks from {filename}")
+    vectordb = Chroma.from_documents(
+        all_chunks,
+        embeddings,
+        persist_directory=chroma_path
+    )
+    print(f"Done! Total chunks stored: {len(all_chunks)}")
 
 all_docs = vectordb.get()
 
@@ -123,18 +155,13 @@ def root():
 
 @app.post("/ask", response_model=AnswerResponse)
 def ask(request: QuestionRequest):
-    candidates = hybrid_search(request.question)
-    top_chunks = rerank(request.question, candidates)
+    candidates = hybrid_search(request.question, top_k=TOP_K)
+    top_chunks = rerank(request.question, candidates, top_n=TOP_N)
     context = "\n\n".join(top_chunks)
-    prompt = f"""Answer the question using ONLY the context below.
-If the answer is not in the context, say "I don't have enough information."
-
-Context:
-{context}
-
-Question:
-{request.question}
-"""
+    prompt = PROMPT_TEMPLATE.format(
+    context=context,
+    question=request.question
+)
     response = gemini_client.models.generate_content(
         model="models/gemini-2.5-flash",
         contents=prompt

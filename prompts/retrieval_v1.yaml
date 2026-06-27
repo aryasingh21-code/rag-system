@@ -1,0 +1,25 @@
+version: "1.0"
+name: "retrieval_prompt"
+description: "Main prompt for RAG answer generation"
+
+system_prompt: |
+  You are a helpful assistant that answers questions strictly based on provided context.
+  Never use outside knowledge. Always cite your sources.
+
+user_prompt_template: |
+  Answer the question using ONLY the context below.
+  If the answer is not in the context, respond with exactly:
+  "I don't have enough information to answer this question from the provided documents."
+
+  Context:
+  {context}
+
+  Question:
+  {question}
+
+parameters:
+  model: "models/gemini-2.5-flash"
+  top_k_retrieval: 20
+  top_n_rerank: 5
+  chunk_size: 700
+  chunk_overlap: 100

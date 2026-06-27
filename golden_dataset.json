@@ -1,0 +1,216 @@
+{
+  "version": "1.0",
+  "description": "Manually verified question-answer pairs for RAG evaluation",
+  "pairs": [
+    {
+      "id": 1,
+      "question": "What is the attention mechanism?",
+      "answer": "An attention function maps a query and a set of key-value pairs to an output. The output is computed as a weighted sum of the values, where the weight is computed by a compatibility function of the query with the corresponding key.",
+      "source": "document.pdf",
+      "page": 4
+    },
+    {
+      "id": 2,
+      "question": "What does BERT stand for?",
+      "answer": "BERT stands for Bidirectional Encoder Representations from Transformers.",
+      "source": "bert.pdf",
+      "page": 1
+    },
+    {
+      "id": 3,
+      "question": "What is multi-head attention?",
+      "answer": "Multi-head attention runs several attention layers in parallel on different projections of queries, keys and values, then concatenates and projects the results.",
+      "source": "document.pdf",
+      "page": 4
+    },
+    {
+      "id": 4,
+      "question": "What tasks was BERT evaluated on?",
+      "answer": "BERT was evaluated on eleven NLP tasks including GLUE, SQuAD v1.1, SQuAD v2.0, and SWAG.",
+      "source": "bert.pdf",
+      "page": 1
+    },
+    {
+      "id": 5,
+      "question": "What is the BLEU score of the Transformer on English to German translation?",
+      "answer": "The Transformer achieves 28.4 BLEU on the WMT 2014 English-to-German translation task.",
+      "source": "document.pdf",
+      "page": 8
+    },
+    {
+      "id": 6,
+      "question": "What is the difference between BERT base and BERT large?",
+      "answer": "BERT base has 12 transformer layers, 768 hidden size, 12 attention heads and 110M parameters. BERT large has 24 layers, 1024 hidden size, 16 attention heads and 340M parameters.",
+      "source": "bert.pdf",
+      "page": 4
+    },
+    {
+      "id": 7,
+      "question": "What is positional encoding in the Transformer?",
+      "answer": "Positional encodings are added to input embeddings to give the model information about the position of tokens in the sequence. They use sine and cosine functions of different frequencies.",
+      "source": "document.pdf",
+      "page": 6
+    },
+    {
+      "id": 8,
+      "question": "What is masked language modeling in BERT?",
+      "answer": "Masked language modeling randomly masks some tokens from the input and trains the model to predict the original vocabulary id of the masked word based on its context.",
+      "source": "bert.pdf",
+      "page": 3
+    },
+    {
+      "id": 9,
+      "question": "What optimizer was used to train the Transformer?",
+      "answer": "The Transformer was trained using the Adam optimizer with beta1 of 0.9, beta2 of 0.98 and epsilon of 10 to the power of negative 9.",
+      "source": "document.pdf",
+      "page": 7
+    },
+    {
+      "id": 10,
+      "question": "What is next sentence prediction in BERT?",
+      "answer": "Next sentence prediction is a pre-training task where the model receives pairs of sentences and learns to predict whether the second sentence follows the first in the original document.",
+      "source": "bert.pdf",
+      "page": 3
+    },
+    {
+      "id": 11,
+      "question": "What are the limitations of recurrent models mentioned in the Transformer paper?",
+      "answer": "Recurrent models process sequences sequentially which precludes parallelization within training examples. They also struggle with long-range dependencies due to the number of operations required to relate signals from distant positions.",
+      "source": "document.pdf",
+      "page": 2
+    },
+    {
+      "id": 12,
+      "question": "What datasets were used to train the Transformer?",
+      "answer": "The Transformer was trained on the WMT 2014 English-German dataset consisting of about 4.5 million sentence pairs and the WMT 2014 English-French dataset consisting of 36 million sentences.",
+      "source": "document.pdf",
+      "page": 7
+    },
+    {
+      "id": 13,
+      "question": "What is WordPiece tokenization in BERT?",
+      "answer": "WordPiece is a tokenization method used by BERT that splits words into subword units. It uses a vocabulary of 30000 tokens and breaks unknown or rare words into smaller known subword pieces.",
+      "source": "bert.pdf",
+      "page": 3
+    },
+    {
+      "id": 14,
+      "question": "What is the CLS token in BERT?",
+      "answer": "The CLS token is a special classification token added at the beginning of every input sequence in BERT. The final hidden state of this token is used as the aggregate sequence representation for classification tasks.",
+      "source": "bert.pdf",
+      "page": 3
+    },
+    {
+      "id": 15,
+      "question": "What dropout rate was used in the Transformer?",
+      "answer": "The Transformer applied dropout with a rate of 0.1 to the output of each sub-layer before it is added to the sub-layer input and normalized.",
+      "source": "document.pdf",
+      "page": 7
+    },
+    {
+      "id": 16,
+      "question": "What is scaled dot product attention?",
+      "answer": "Scaled dot product attention computes the dot products of the query with all keys, divides each by the square root of the key dimension, and applies a softmax function to obtain the weights on the values.",
+      "source": "document.pdf",
+      "page": 4
+    },
+    {
+      "id": 17,
+      "question": "What is the SEP token in BERT?",
+      "answer": "The SEP token is a special separator token used in BERT to separate two sentences in a sentence pair input. It marks the boundary between sentence A and sentence B.",
+      "source": "bert.pdf",
+      "page": 3
+    },
+    {
+      "id": 18,
+      "question": "How many attention heads does the base Transformer use?",
+      "answer": "The base Transformer model uses 8 parallel attention heads.",
+      "source": "document.pdf",
+      "page": 5
+    },
+    {
+      "id": 19,
+      "question": "What is fine-tuning in BERT?",
+      "answer": "Fine-tuning in BERT involves initializing the model with pre-trained parameters and then training all parameters on a downstream task using labeled data. It adds a task-specific output layer on top of the pre-trained model.",
+      "source": "bert.pdf",
+      "page": 4
+    },
+    {
+      "id": 20,
+      "question": "What is the encoder decoder structure in the Transformer?",
+      "answer": "The Transformer encoder maps an input sequence to a sequence of continuous representations. The decoder then generates an output sequence one element at a time using the encoder output and previously generated outputs.",
+      "source": "document.pdf",
+      "page": 3
+    },
+    {
+      "id": 21,
+      "question": "What is the feed forward network in the Transformer?",
+      "answer": "Each encoder and decoder layer contains a fully connected feed-forward network applied to each position separately and identically. It consists of two linear transformations with a ReLU activation in between.",
+      "source": "document.pdf",
+      "page": 5
+    },
+    {
+      "id": 22,
+      "question": "What score did BERT achieve on SQuAD v1.1?",
+      "answer": "BERT large achieved an F1 score of 93.2 on SQuAD v1.1, surpassing the top ensemble system by more than 1.5 points.",
+      "source": "bert.pdf",
+      "page": 7
+    },
+    {
+      "id": 23,
+      "question": "What is label smoothing in the Transformer?",
+      "answer": "The Transformer employed label smoothing of value 0.1 during training. This hurts perplexity but improves accuracy and BLEU score.",
+      "source": "document.pdf",
+      "page": 7
+    },
+    {
+      "id": 24,
+      "question": "How does BERT handle question answering tasks?",
+      "answer": "For question answering BERT takes the question and passage as input, then predicts the start and end token positions of the answer span within the passage using two learned vectors.",
+      "source": "bert.pdf",
+      "page": 5
+    },
+    {
+      "id": 25,
+      "question": "What is self attention?",
+      "answer": "Self attention is an attention mechanism that relates different positions of a single sequence to compute a representation of that sequence. It allows the model to look at other words in the input when encoding a specific word.",
+      "source": "document.pdf",
+      "page": 2
+    },
+    {
+      "id": 26,
+      "question": "What is the GLUE benchmark?",
+      "answer": "GLUE is the General Language Understanding Evaluation benchmark, a collection of diverse natural language understanding tasks used to evaluate and analyze NLP models.",
+      "source": "bert.pdf",
+      "page": 6
+    },
+    {
+      "id": 27,
+      "question": "What hardware was used to train the Transformer?",
+      "answer": "The Transformer was trained on a machine with 8 NVIDIA P100 GPUs. The base model was trained for 100000 steps taking about 12 hours and the big model was trained for 300000 steps taking about 3.5 days.",
+      "source": "document.pdf",
+      "page": 7
+    },
+    {
+      "id": 28,
+      "question": "What is bidirectional context in BERT?",
+      "answer": "Bidirectional context means BERT jointly conditions on both left and right context in all layers when pre-training, unlike previous models that only used left-to-right or shallow bidirectional approaches.",
+      "source": "bert.pdf",
+      "page": 2
+    },
+    {
+      "id": 29,
+      "question": "What is beam search in the Transformer?",
+      "answer": "Beam search is the decoding strategy used by the Transformer during inference. It keeps track of the top beam size most likely partial sequences at each step and uses a length penalty to control output length.",
+      "source": "document.pdf",
+      "page": 8
+    },
+    {
+      "id": 30,
+      "question": "What pre-training data was used for BERT?",
+      "answer": "BERT was pre-trained on the BooksCorpus with 800 million words and English Wikipedia with 2500 million words, using only the text passages and ignoring lists, tables and headers.",
+      "source": "bert.pdf",
+      "page": 3
+    }
+  ]
+}
