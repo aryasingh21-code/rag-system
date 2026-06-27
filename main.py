@@ -34,8 +34,24 @@ class GeminiEmbeddings(Embeddings):
         )
         return result.embeddings[0].values
 
+from langchain_community.document_loaders import PyPDFLoader
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+
 embeddings = GeminiEmbeddings(api_key=API_KEY)
-vectordb = Chroma(persist_directory="./chroma_db", embedding_function=embeddings)
+
+# Auto-build ChromaDB if empty
+chroma_path = "./chroma_db"
+vectordb = Chroma(persist_directory=chroma_path, embedding_function=embeddings)
+existing = vectordb.get()
+
+if not existing["documents"]:
+    print("ChromaDB is empty — building from document.pdf...")
+    loader = PyPDFLoader("document.pdf")
+    docs = loader.load()
+    splitter = RecursiveCharacterTextSplitter(chunk_size=700, chunk_overlap=100)
+    chunks = splitter.split_documents(docs)
+    vectordb = Chroma.from_documents(chunks, embeddings, persist_directory=chroma_path)
+    print("Done! ChromaDB built.")
 
 all_docs = vectordb.get()
 
