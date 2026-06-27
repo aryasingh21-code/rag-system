@@ -22,3 +22,6 @@ Documents → Chunking → Embeddings → ChromaDB → Retrieval → Gemini → 
 ## API Usage
 POST /ask
 {"question": "What is the attention mechanism?"}
+
+## Live Demo
+https://rag-system-production-7300.up.railway.app/ui
