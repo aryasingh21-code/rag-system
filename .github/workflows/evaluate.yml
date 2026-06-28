@@ -1,0 +1,42 @@
+name: RAG Quality Gate
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  evaluate:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.12'
+
+    - name: Install dependencies
+      run: |
+        pip install langchain-chroma langchain-community langchain-huggingface
+        pip install sentence-transformers rank-bm25 pypdf requests
+
+    - name: Run evaluation
+      env:
+        GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      run: |
+        python evaluate_rag.py --ci
+
+    - name: Check quality threshold
+      run: |
+        python -c "
+        import json
+        with open('eval_results.json') as f:
+            results = json.load(f)
+        score = results['semantic_similarity']
+        print(f'Score: {score}')
+        assert score >= 0.75, f'Quality gate failed! Score {score} below threshold 0.75'
+        print('Quality gate passed!')
+        "

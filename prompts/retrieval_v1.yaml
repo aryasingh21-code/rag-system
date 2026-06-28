@@ -18,7 +18,7 @@ user_prompt_template: |
   {question}
 
 parameters:
-  model: "models/gemini-2.5-flash"
+  model: "models/gemini-2.0-flash"
   top_k_retrieval: 20
   top_n_rerank: 5
   chunk_size: 700

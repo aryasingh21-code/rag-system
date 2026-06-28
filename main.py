@@ -1,180 +1,318 @@
+import os
+import yaml
+import requests
+from dotenv import load_dotenv
+import re
 from fastapi import FastAPI
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
-from langchain_chroma import Chroma
-from langchain_core.embeddings import Embeddings
+
 from google import genai
+
+from langchain_chroma import Chroma
+from langchain_huggingface import HuggingFaceEmbeddings
+
 from rank_bm25 import BM25Okapi
 from sentence_transformers import CrossEncoder
-from typing import List
-import os
-from dotenv import load_dotenv
+
+# -------------------------------------------------
+# Load environment
+# -------------------------------------------------
 
 load_dotenv()
+
 API_KEY = os.getenv("GEMINI_API_KEY")
+
+gemini_client = genai.Client(api_key=API_KEY)
+
+# -------------------------------------------------
+# FastAPI
+# -------------------------------------------------
 
 app = FastAPI(title="Production RAG API")
 
-import yaml
+# -------------------------------------------------
+# Load Prompt Config
+# -------------------------------------------------
 
-# Load prompt config
 with open("prompts/retrieval_v1.yaml", "r") as f:
     prompt_config = yaml.safe_load(f)
 
 PROMPT_TEMPLATE = prompt_config["user_prompt_template"]
+
 MODEL = prompt_config["parameters"]["model"]
+
 TOP_K = prompt_config["parameters"]["top_k_retrieval"]
+
 TOP_N = prompt_config["parameters"]["top_n_rerank"]
 
-class GeminiEmbeddings(Embeddings):
-    def __init__(self, api_key: str):
-        self.client = genai.Client(api_key=api_key)
+# -------------------------------------------------
+# Local Embeddings
+# -------------------------------------------------
 
-    def embed_documents(self, texts: List[str]) -> List[List[float]]:
-        import time
-        all_embeddings = []
-        batch_size = 20
-        for i in range(0, len(texts), batch_size):
-            batch = texts[i:i + batch_size]
-            result = self.client.models.embed_content(
-                model="models/gemini-embedding-001",
-                contents=batch
-            )
-            all_embeddings.extend([e.values for e in result.embeddings])
-            print(f"Embedded {min(i + batch_size, len(texts))}/{len(texts)} chunks...")
-            time.sleep(35)
-        return all_embeddings
+embedding_model = HuggingFaceEmbeddings(
+    model_name="BAAI/bge-base-en-v1.5",
+    encode_kwargs={
+        "normalize_embeddings": True
+    }
+)
 
-    def embed_query(self, text: str) -> List[float]:
-        result = self.client.models.embed_content(
-            model="models/gemini-embedding-001",
-            contents=text
-        )
-        return result.embeddings[0].values
+# -------------------------------------------------
+# Load Chroma
+# -------------------------------------------------
 
-from langchain_community.document_loaders import PyPDFLoader
-from langchain_text_splitters import RecursiveCharacterTextSplitter
 
-embeddings = GeminiEmbeddings(api_key=API_KEY)
 
-# Auto-build ChromaDB if empty
-chroma_path = "./chroma_db"
-vectordb = Chroma(persist_directory=chroma_path, embedding_function=embeddings)
-existing = vectordb.get()
-
-if not existing["documents"]:
-    print("ChromaDB is empty — building from all PDFs in documents/...")
-    all_chunks = []
-    pdf_folder = "./documents"
-    for filename in os.listdir(pdf_folder):
-        if filename.endswith(".pdf"):
-            print(f"Loading {filename}...")
-            loader = PyPDFLoader(os.path.join(pdf_folder, filename))
-            docs = loader.load()
-            splitter = RecursiveCharacterTextSplitter(
-                chunk_size=700,
-                chunk_overlap=100
-            )
-            chunks = splitter.split_documents(docs)
-            all_chunks.extend(chunks)
-            print(f"  → {len(chunks)} chunks from {filename}")
-    vectordb = Chroma.from_documents(
-        all_chunks,
-        embeddings,
-        persist_directory=chroma_path
-    )
-    print(f"Done! Total chunks stored: {len(all_chunks)}")
+vectordb = Chroma(
+    persist_directory="./chroma_db",
+    embedding_function=embedding_model,
+)
 
 all_docs = vectordb.get()
 
-all_texts = all_docs.get("documents", [])
-all_metadatas = all_docs.get("metadatas", [])
+all_texts = all_docs["documents"]
 
-if all_texts:
-    tokenized_corpus = [doc.lower().split() for doc in all_texts]
-    bm25 = BM25Okapi(tokenized_corpus)
-else:
-    bm25 = None
+all_metadatas = all_docs["metadatas"]
 
-reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
-gemini_client = genai.Client(api_key=API_KEY)
+
+
+
+
+
+
+# -------------------------------------------------
+# BM25
+# -------------------------------------------------
+
+def tokenize(text):
+    return re.findall(r"\w+", text.lower())
+
+tokenized_corpus = [
+    tokenize(doc)
+    for doc in all_texts
+]
+
+bm25 = BM25Okapi(tokenized_corpus)
+
+# -------------------------------------------------
+# Cross Encoder
+# -------------------------------------------------
+
+reranker = CrossEncoder(
+    "BAAI/bge-reranker-base"
+)
+
+# -------------------------------------------------
+# API Models
+# -------------------------------------------------
 
 class QuestionRequest(BaseModel):
     question: str
 
+
 class AnswerResponse(BaseModel):
     question: str
     answer: str
-    sources: List[str]
+    sources: list[str]
 
-def hybrid_search(question: str, top_k: int = 20):
-    vector_results = vectordb.similarity_search(question, k=top_k)
 
-    vector_texts = [doc.page_content for doc in vector_results]
+# -------------------------------------------------
+# Hybrid Search
+# -------------------------------------------------
 
-    if bm25 is None:
-        return vector_texts
+def hybrid_search(question, top_k=20):
 
-    tokenized_query = question.lower().split()
-    bm25_scores = bm25.get_scores(tokenized_query)
+    # -------------------------------
+    # Dense Retrieval (Chroma)
+    # -------------------------------
 
-    top_bm25_indices = sorted(
-        range(len(bm25_scores)),
-        key=lambda i: bm25_scores[i],
+    vector_results = vectordb.similarity_search_with_score(
+        question,
+        k=top_k
+    )
+
+    # -------------------------------
+    # BM25 Retrieval
+    # -------------------------------
+
+    bm25_scores = bm25.get_scores(tokenize(question))
+
+    # -------------------------------
+    # Combine Scores
+    # -------------------------------
+
+    scores = {}
+
+    # Dense similarity
+    # Chroma returns distance (smaller is better)
+    for doc, distance in vector_results:
+
+        text = doc.page_content
+
+        dense_score = 1 / (1 + distance)
+
+        scores[text] = {
+            "score": dense_score,
+            "metadata": doc.metadata
+        }
+
+    # BM25
+    max_bm25 = max(bm25_scores) if max(bm25_scores) > 0 else 1
+
+    for idx, score in enumerate(bm25_scores):
+
+        text = all_texts[idx]
+
+        normalized_bm25 = score / max_bm25
+
+        if text in scores:
+
+            scores[text]["score"] += normalized_bm25
+
+        else:
+
+            scores[text] = {
+                "score": normalized_bm25,
+                "metadata": all_metadatas[idx]
+            }
+
+    # -------------------------------
+    # Sort
+    # -------------------------------
+
+    ranked = sorted(
+        scores.items(),
+        key=lambda x: x[1]["score"],
         reverse=True
-    )[:top_k]
+    )
 
-    combined = list(vector_texts)
+    return [
+        text
+        for text, _ in ranked[:top_k]
+    ]
+# -------------------------------------------------
+# Reranking
+# -------------------------------------------------
 
-    for i in top_bm25_indices:
-        if all_texts[i] not in combined:
-            combined.append(all_texts[i])
+def rerank(question, chunks, top_n=5):
 
-    return combined[:top_k]
+    pairs = [
+        [question, chunk]
+        for chunk in chunks
+    ]
 
-def rerank(question: str, chunks: list, top_n: int = 5) -> list:
-    pairs = [[question, chunk] for chunk in chunks]
     scores = reranker.predict(pairs)
-    ranked = sorted(zip(scores, chunks), reverse=True)
-    return [chunk for _, chunk in ranked[:top_n]]
 
-def get_metadata(text: str) -> dict:
-    for i, doc_text in enumerate(all_texts):
-        if doc_text == text:
+    ranked = sorted(
+        zip(scores, chunks),
+        reverse=True
+    )
+
+    return [
+        chunk
+        for _, chunk in ranked[:top_n]
+    ]
+
+# -------------------------------------------------
+# Metadata
+# -------------------------------------------------
+
+def get_metadata(chunk):
+
+    for i, text in enumerate(all_texts):
+
+        if text == chunk:
+
             return all_metadatas[i]
+
     return {}
+
+# -------------------------------------------------
+# Routes
+# -------------------------------------------------
+
+@app.get("/")
+def home():
+
+    return {
+        "message": "Production RAG API Running"
+    }
+
 
 @app.get("/ui", response_class=HTMLResponse)
 def ui():
-    with open("templates/index.html", "r", encoding="utf-8") as f:
+
+    with open(
+        "templates/index.html",
+        encoding="utf-8"
+    ) as f:
+
         return f.read()
 
-@app.get("/")
-def root():
-    return {"message": "Production RAG API is running!"}
+# -------------------------------------------------
+# Ask
+# -------------------------------------------------
 
 @app.post("/ask", response_model=AnswerResponse)
 def ask(request: QuestionRequest):
-    candidates = hybrid_search(request.question, top_k=TOP_K)
-    top_chunks = rerank(request.question, candidates, top_n=TOP_N)
-    context = "\n\n".join(top_chunks)
-    prompt = PROMPT_TEMPLATE.format(
-    context=context,
-    question=request.question
-)
-    response = gemini_client.models.generate_content(
-        model="models/gemini-2.5-flash",
-        contents=prompt
+
+    candidates = hybrid_search(
+        request.question,
+        TOP_K
     )
+
+    top_chunks = rerank(
+        request.question,
+        candidates,
+        TOP_N
+    )
+
+    print("\n" + "=" * 80)
+    print("QUESTION:")
+    print(request.question)
+
+    print("\nTOP CHUNKS:")
+
+    for i, chunk in enumerate(top_chunks, 1):
+        print(f"\n----- Chunk {i} -----")
+        print(chunk[:800])
+
+    context = "\n\n".join(top_chunks)
+
+    prompt = PROMPT_TEMPLATE.format(
+        context=context,
+        question=request.question
+    )
+
+    response = requests.post(
+        "http://localhost:11434/api/generate",
+        json={
+            "model": "llama3.2",
+            "prompt": prompt,
+            "stream": False
+        }
+    )
+
+    answer = response.json()["response"]
+
     sources = []
+
     for chunk in top_chunks:
+
         meta = get_metadata(chunk)
+
         if meta:
-            source = f"Page {meta.get('page', 0) + 1} of {meta.get('source', 'document.pdf')}"
+
+            source = (
+                f"Page {meta.get('page',0)+1} "
+                f"of {os.path.basename(meta.get('source','document.pdf'))}"
+            )
+
             if source not in sources:
                 sources.append(source)
+
     return AnswerResponse(
         question=request.question,
-        answer=response.text,
-        sources=sources
+        answer=answer,
+        sources=sources,
     )

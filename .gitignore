@@ -1,5 +1,9 @@
 venv/
+.venv/
+ragas-env/
 chroma_db/
 .env
 __pycache__/
 *.pyc
+*.dll
+*.pyd
