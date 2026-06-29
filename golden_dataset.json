@@ -1,5 +1,5 @@
 {
-  "version": "1.0",
+  "version": "1.1",
   "description": "Manually verified question-answer pairs for RAG evaluation",
   "pairs": [
     {
@@ -211,6 +211,41 @@
       "answer": "BERT was pre-trained on the BooksCorpus with 800 million words and English Wikipedia with 2500 million words, using only the text passages and ignoring lists, tables and headers.",
       "source": "bert.pdf",
       "page": 3
+    },
+    {
+      "id": 31,
+      "question": "What four modules make up BERT's architecture according to its Wikipedia overview?",
+      "answer": "BERT consists of a tokenizer, an embedding module, an encoder made of a stack of Transformer blocks with self-attention but no causal masking, and a task head that produces a probability distribution over the vocabulary.",
+      "source": "https://en.wikipedia.org/wiki/BERT_(language_model)",
+      "page": null
+    },
+    {
+      "id": 32,
+      "question": "Why does BERT's masked language modeling not mask every selected token?",
+      "answer": "Of the tokens selected for masking, 80% are replaced with the [MASK] token, 10% are replaced with a random word, and 10% are left unchanged, in order to avoid a mismatch between the inputs seen during pretraining and the inputs seen later when the model is applied to text without any masked tokens.",
+      "source": "https://en.wikipedia.org/wiki/BERT_(language_model)",
+      "page": null
+    },
+    {
+      "id": 33,
+      "question": "Why can't BERT generate text the way decoder-based language models can?",
+      "answer": "BERT uses an encoder-only architecture with no decoder, so it cannot be prompted or generate text in the usual way. Extending a sentence would require masking out many tokens at once, a pattern very different from anything seen during training, which causes its performance to degrade.",
+      "source": "https://en.wikipedia.org/wiki/BERT_(language_model)",
+      "page": null
+    },
+    {
+      "id": 34,
+      "question": "How long did it take to train BERT base and BERT large according to the Wikipedia article, and what was the estimated cost?",
+      "answer": "BERT base was trained on 4 Cloud TPUs (16 TPU chips total) for 4 days at an estimated cost of 500 USD. BERT large was trained on 16 Cloud TPUs (64 TPU chips total), also for 4 days.",
+      "source": "https://en.wikipedia.org/wiki/BERT_(language_model)",
+      "page": null
+    },
+    {
+      "id": 35,
+      "question": "Name two BERT variant models mentioned in the Wikipedia article and how they differ from the original BERT.",
+      "answer": "RoBERTa is an engineering improvement that keeps BERT's architecture but is slightly larger, removes the next-sentence-prediction task, and uses larger mini-batches. DistilBERT distills BERT base down to about 60% of its parameters while preserving roughly 95% of its benchmark performance.",
+      "source": "https://en.wikipedia.org/wiki/BERT_(language_model)",
+      "page": null
     }
   ]
 }

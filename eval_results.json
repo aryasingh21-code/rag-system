@@ -1,0 +1,251 @@
+{
+  "summary": {
+    "avg_answer_similarity": 0.817,
+    "avg_faithfulness": 0.765,
+    "hit_at_8": 0.567,
+    "mrr": 0.279,
+    "avg_latency_sec": 25.74
+  },
+  "per_question": [
+    {
+      "question": "What is the attention mechanism?",
+      "answer_similarity": 0.699,
+      "faithfulness": 0.751,
+      "hit_at_k": 0.0,
+      "mrr": 0.0,
+      "latency_sec": 30.74
+    },
+    {
+      "question": "What does BERT stand for?",
+      "answer_similarity": 0.974,
+      "faithfulness": 0.803,
+      "hit_at_k": 1.0,
+      "mrr": 0.5,
+      "latency_sec": 11.9
+    },
+    {
+      "question": "What is multi-head attention?",
+      "answer_similarity": 0.724,
+      "faithfulness": 0.742,
+      "hit_at_k": 1.0,
+      "mrr": 0.333,
+      "latency_sec": 13.34
+    },
+    {
+      "question": "What tasks was BERT evaluated on?",
+      "answer_similarity": 0.757,
+      "faithfulness": 0.693,
+      "hit_at_k": 1.0,
+      "mrr": 0.5,
+      "latency_sec": 12.86
+    },
+    {
+      "question": "What is the BLEU score of the Transformer on English to German translation?",
+      "answer_similarity": 0.749,
+      "faithfulness": 0.828,
+      "hit_at_k": 1.0,
+      "mrr": 1.0,
+      "latency_sec": 57.83
+    },
+    {
+      "question": "What is the difference between BERT base and BERT large?",
+      "answer_similarity": 0.847,
+      "faithfulness": 0.69,
+      "hit_at_k": 0.0,
+      "mrr": 0.0,
+      "latency_sec": 16.44
+    },
+    {
+      "question": "What is positional encoding in the Transformer?",
+      "answer_similarity": 0.86,
+      "faithfulness": 0.867,
+      "hit_at_k": 0.0,
+      "mrr": 0.0,
+      "latency_sec": 27.04
+    },
+    {
+      "question": "What is masked language modeling in BERT?",
+      "answer_similarity": 0.792,
+      "faithfulness": 0.794,
+      "hit_at_k": 0.0,
+      "mrr": 0.0,
+      "latency_sec": 21.55
+    },
+    {
+      "question": "What optimizer was used to train the Transformer?",
+      "answer_similarity": 0.868,
+      "faithfulness": 0.693,
+      "hit_at_k": 1.0,
+      "mrr": 0.333,
+      "latency_sec": 63.14
+    },
+    {
+      "question": "What is next sentence prediction in BERT?",
+      "answer_similarity": 0.806,
+      "faithfulness": 0.815,
+      "hit_at_k": 0.0,
+      "mrr": 0.0,
+      "latency_sec": 27.02
+    },
+    {
+      "question": "What are the limitations of recurrent models mentioned in the Transformer paper?",
+      "answer_similarity": 0.859,
+      "faithfulness": 0.812,
+      "hit_at_k": 1.0,
+      "mrr": 1.0,
+      "latency_sec": 25.88
+    },
+    {
+      "question": "What datasets were used to train the Transformer?",
+      "answer_similarity": 0.801,
+      "faithfulness": 0.744,
+      "hit_at_k": 0.0,
+      "mrr": 0.0,
+      "latency_sec": 25.18
+    },
+    {
+      "question": "What is WordPiece tokenization in BERT?",
+      "answer_similarity": 0.907,
+      "faithfulness": 0.781,
+      "hit_at_k": 0.0,
+      "mrr": 0.0,
+      "latency_sec": 19.56
+    },
+    {
+      "question": "What is the CLS token in BERT?",
+      "answer_similarity": 0.936,
+      "faithfulness": 0.755,
+      "hit_at_k": 1.0,
+      "mrr": 0.333,
+      "latency_sec": 15.58
+    },
+    {
+      "question": "What dropout rate was used in the Transformer?",
+      "answer_similarity": 0.811,
+      "faithfulness": 0.668,
+      "hit_at_k": 0.0,
+      "mrr": 0.0,
+      "latency_sec": 14.82
+    },
+    {
+      "question": "What is scaled dot product attention?",
+      "answer_similarity": 0.83,
+      "faithfulness": 0.909,
+      "hit_at_k": 1.0,
+      "mrr": 1.0,
+      "latency_sec": 27.87
+    },
+    {
+      "question": "What is the SEP token in BERT?",
+      "answer_similarity": 0.91,
+      "faithfulness": 0.693,
+      "hit_at_k": 1.0,
+      "mrr": 0.333,
+      "latency_sec": 13.34
+    },
+    {
+      "question": "How many attention heads does the base Transformer use?",
+      "answer_similarity": 0.822,
+      "faithfulness": 0.737,
+      "hit_at_k": 1.0,
+      "mrr": 0.25,
+      "latency_sec": 34.8
+    },
+    {
+      "question": "What is fine-tuning in BERT?",
+      "answer_similarity": 0.852,
+      "faithfulness": 0.809,
+      "hit_at_k": 0.0,
+      "mrr": 0.0,
+      "latency_sec": 15.08
+    },
+    {
+      "question": "What is the encoder decoder structure in the Transformer?",
+      "answer_similarity": 0.867,
+      "faithfulness": 0.78,
+      "hit_at_k": 1.0,
+      "mrr": 0.333,
+      "latency_sec": 12.88
+    },
+    {
+      "question": "What is the feed forward network in the Transformer?",
+      "answer_similarity": 0.788,
+      "faithfulness": 0.782,
+      "hit_at_k": 0.0,
+      "mrr": 0.0,
+      "latency_sec": 14.97
+    },
+    {
+      "question": "What score did BERT achieve on SQuAD v1.1?",
+      "answer_similarity": 0.636,
+      "faithfulness": 0.612,
+      "hit_at_k": 1.0,
+      "mrr": 0.5,
+      "latency_sec": 15.4
+    },
+    {
+      "question": "What is label smoothing in the Transformer?",
+      "answer_similarity": 0.767,
+      "faithfulness": 0.697,
+      "hit_at_k": 0.0,
+      "mrr": 0.0,
+      "latency_sec": 28.05
+    },
+    {
+      "question": "How does BERT handle question answering tasks?",
+      "answer_similarity": 0.773,
+      "faithfulness": 0.861,
+      "hit_at_k": 1.0,
+      "mrr": 0.25,
+      "latency_sec": 32.4
+    },
+    {
+      "question": "What is self attention?",
+      "answer_similarity": 0.823,
+      "faithfulness": 0.803,
+      "hit_at_k": 0.0,
+      "mrr": 0.0,
+      "latency_sec": 28.38
+    },
+    {
+      "question": "What is the GLUE benchmark?",
+      "answer_similarity": 0.882,
+      "faithfulness": 0.846,
+      "hit_at_k": 1.0,
+      "mrr": 0.2,
+      "latency_sec": 102.3
+    },
+    {
+      "question": "What hardware was used to train the Transformer?",
+      "answer_similarity": 0.758,
+      "faithfulness": 0.731,
+      "hit_at_k": 0.0,
+      "mrr": 0.0,
+      "latency_sec": 20.45
+    },
+    {
+      "question": "What is bidirectional context in BERT?",
+      "answer_similarity": 0.836,
+      "faithfulness": 0.8,
+      "hit_at_k": 1.0,
+      "mrr": 0.25,
+      "latency_sec": 16.11
+    },
+    {
+      "question": "What is beam search in the Transformer?",
+      "answer_similarity": 0.819,
+      "faithfulness": 0.694,
+      "hit_at_k": 1.0,
+      "mrr": 0.25,
+      "latency_sec": 15.41
+    },
+    {
+      "question": "What pre-training data was used for BERT?",
+      "answer_similarity": 0.756,
+      "faithfulness": 0.767,
+      "hit_at_k": 1.0,
+      "mrr": 1.0,
+      "latency_sec": 11.91
+    }
+  ]
+}

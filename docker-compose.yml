@@ -1,0 +1,102 @@
+services:
+
+  # -------------------------------------------------------
+  # Ollama — local LLM server
+  # -------------------------------------------------------
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+
+    ports:
+      - "11434:11434"
+
+    volumes:
+      - ollama_data:/root/.ollama
+
+    # ── GPU support ──────────────────────────────────────
+    # Uncomment if you have an NVIDIA GPU +
+    # nvidia-container-toolkit installed on the host.
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+    # ollama list is built into the container — no curl needed
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list || exit 1"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+      start_period: 60s
+
+
+  # -------------------------------------------------------
+  # Ingest — one-shot service that populates chroma_db
+  # -------------------------------------------------------
+  ingest:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ingest
+    command: python ingest.py
+
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+
+    volumes:
+      - ./chroma_db:/app/chroma_db
+      - hf_cache:/app/.cache/huggingface
+
+    env_file:
+      - .env
+
+    depends_on:
+      ollama:
+        condition: service_healthy
+
+    restart: "no"
+
+
+  # -------------------------------------------------------
+  # RAG API — FastAPI application
+  # -------------------------------------------------------
+  rag-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: rag-api
+    restart: unless-stopped
+
+    ports:
+      - "8000:8000"
+
+    env_file:
+      - .env
+
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+
+    volumes:
+      - ./chroma_db:/app/chroma_db
+      - hf_cache:/app/.cache/huggingface
+
+    depends_on:
+      ollama:
+        condition: service_healthy
+
+    # Use Python to hit the health endpoint — no curl needed
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://localhost:8000/')\" || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
+
+
+volumes:
+  ollama_data:
+  hf_cache:

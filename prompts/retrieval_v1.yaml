@@ -18,8 +18,14 @@ user_prompt_template: |
   {question}
 
 parameters:
-  model: "models/gemini-2.0-flash"
+  model: "llama3.2"
   top_k_retrieval: 20
-  top_n_rerank: 5
+  top_n_rerank: 8
   chunk_size: 700
   chunk_overlap: 100
+  use_multi_query: false
+  query_variants: 2
+
+citation:
+  support_threshold: 0.35
+  decline_message: "I don't have enough information to answer this question from the provided documents."

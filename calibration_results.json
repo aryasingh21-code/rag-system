@@ -1,0 +1,181 @@
+{
+  "good_questions": [
+    {
+      "question": "What is the attention mechanism?",
+      "answer_preview": "The attention mechanism is an attention function that computes a matrix of outpu",
+      "support_score": 0.998
+    },
+    {
+      "question": "What does BERT stand for?",
+      "answer_preview": "BERT stands for Bidirectional Encoder Representations from Transformers.",
+      "support_score": 0.999
+    },
+    {
+      "question": "What is multi-head attention?",
+      "answer_preview": "Multi-Head Attention consists of several attention layers running in parallel. I",
+      "support_score": 0.954
+    },
+    {
+      "question": "What tasks was BERT evaluated on?",
+      "answer_preview": "According to the context, BERT was evaluated on 11 NLP tasks, specifically inclu",
+      "support_score": 0.956
+    },
+    {
+      "question": "What is the BLEU score of the Transformer on English to German translation?",
+      "answer_preview": "The BLEU score of the Transformer on the WMT 2014 English-to-German translation ",
+      "support_score": 1.0
+    },
+    {
+      "question": "What is the difference between BERT base and BERT large?",
+      "answer_preview": "The table shows the results for the two models, but it does not explicitly state",
+      "support_score": 0.993
+    },
+    {
+      "question": "What is positional encoding in the Transformer?",
+      "answer_preview": "Positional encoding in the Transformer is defined as:\n\nP E(pos,2i) = sin(pos/100",
+      "support_score": 0.999
+    },
+    {
+      "question": "What is masked language modeling in BERT?",
+      "answer_preview": "Masked language modeling is a pre-training objective used in BERT, which involve",
+      "support_score": 0.999
+    },
+    {
+      "question": "What optimizer was used to train the Transformer?",
+      "answer_preview": "The Adam optimizer was used to train the Transformer, with specific hyperparamet",
+      "support_score": 0.946
+    },
+    {
+      "question": "What is next sentence prediction in BERT?",
+      "answer_preview": "Next sentence prediction (NSP) is the \"next sentence prediction\" task used in BE",
+      "support_score": 0.977
+    },
+    {
+      "question": "What are the limitations of recurrent models mentioned in the Transformer paper?",
+      "answer_preview": "The context mentions that \"RNN sequence-to-sequence models have not been able to",
+      "support_score": 0.936
+    },
+    {
+      "question": "What datasets were used to train the Transformer?",
+      "answer_preview": "The Wall Street Journal (WSJ) and the Penn Treebank were used to train the Trans",
+      "support_score": 0.888
+    },
+    {
+      "question": "What is WordPiece tokenization in BERT?",
+      "answer_preview": "WordPiece tokenization refers to a process that divides input text into individu",
+      "support_score": 0.952
+    },
+    {
+      "question": "What is the CLS token in BERT?",
+      "answer_preview": "The CLS (Class) token in BERT refers to the special classification token that al",
+      "support_score": 0.993
+    },
+    {
+      "question": "What dropout rate was used in the Transformer?",
+      "answer_preview": "The text mentions that for the base model, the dropout rate Pdrop = 0.1 is used,",
+      "support_score": 0.936
+    },
+    {
+      "question": "What is scaled dot product attention?",
+      "answer_preview": "Scaled Dot-Product Attention is an attention function described in the context, ",
+      "support_score": 0.48
+    },
+    {
+      "question": "What is the SEP token in BERT?",
+      "answer_preview": "The SEP (Separator) token in BERT is the special symbol used to separate non-con",
+      "support_score": 0.997
+    },
+    {
+      "question": "How many attention heads does the base Transformer use?",
+      "answer_preview": "The base Transformer uses 8 parallel attention layers (or heads).",
+      "support_score": 0.93
+    },
+    {
+      "question": "What is fine-tuning in BERT?",
+      "answer_preview": "Fine-tuning in BERT is straightforward and allows the model to model many downst",
+      "support_score": 1.0
+    },
+    {
+      "question": "What is the encoder decoder structure in the Transformer?",
+      "answer_preview": "The encoder-decoder structure in the Transformer consists of two stacked layers:",
+      "support_score": 0.998
+    },
+    {
+      "question": "What is the feed forward network in the Transformer?",
+      "answer_preview": "The feed-forward network (FFN) consists of two linear transformations with a ReL",
+      "support_score": 0.997
+    },
+    {
+      "question": "What score did BERT achieve on SQuAD v1.1?",
+      "answer_preview": "The score of 80.8 was achieved by the BERTBASE (Single) model on SQuAD v1.1.",
+      "support_score": 0.993
+    },
+    {
+      "question": "What is label smoothing in the Transformer?",
+      "answer_preview": "Label Smoothing is a technique used during training where the model learns to be",
+      "support_score": 0.998
+    },
+    {
+      "question": "How does BERT handle question answering tasks?",
+      "answer_preview": "BERT handles question-answering tasks by using the [CLS] representation fed into",
+      "support_score": 0.987
+    },
+    {
+      "question": "What is self attention?",
+      "answer_preview": "Self-attention is an attention mechanism relating different positions of a singl",
+      "support_score": 0.999
+    },
+    {
+      "question": "What is the GLUE benchmark?",
+      "answer_preview": "The GLUE benchmark.",
+      "support_score": 0.998
+    },
+    {
+      "question": "What hardware was used to train the Transformer?",
+      "answer_preview": "I don't have enough information to answer this question from the provided docume",
+      "support_score": null
+    },
+    {
+      "question": "What is bidirectional context in BERT?",
+      "answer_preview": "According to the context, \"bidirectional context\" refers to the ability of BERT ",
+      "support_score": 0.994
+    },
+    {
+      "question": "What is beam search in the Transformer?",
+      "answer_preview": "Beam search is described in the context as \"used beam size of 4\" for both WSJ on",
+      "support_score": 0.894
+    },
+    {
+      "question": "What pre-training data was used for BERT?",
+      "answer_preview": "The pre-training data used for BERT consists of two sources: the BooksCorpus (80",
+      "support_score": 0.999
+    }
+  ],
+  "bad_questions": [
+    {
+      "question": "What is the capital of France?",
+      "answer_preview": "I don't have enough information to answer this question from the provided docume",
+      "support_score": null
+    },
+    {
+      "question": "How do I bake a chocolate cake?",
+      "answer_preview": "I don't have enough information to answer this question from the provided docume",
+      "support_score": null
+    },
+    {
+      "question": "Who won the cricket world cup in 2011?",
+      "answer_preview": "I don't have enough information to answer this question from the provided docume",
+      "support_score": null
+    },
+    {
+      "question": "What is the boiling point of water in Fahrenheit?",
+      "answer_preview": "I don't have enough information to answer this question from the provided docume",
+      "support_score": null
+    },
+    {
+      "question": "Recommend a good sci-fi movie to watch tonight.",
+      "answer_preview": "I don't have enough information to answer this question from the provided docume",
+      "support_score": null
+    }
+  ]
+}

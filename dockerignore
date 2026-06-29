@@ -1,0 +1,53 @@
+# ── Python cache ──────────────────────────────────────────
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+
+# ── Virtual environments ───────────────────────────────────
+# Your project has both venv/ and ragas-env/ — exclude both
+venv/
+ragas-env/
+.venv/
+env/
+
+# ── Chroma DB ──────────────────────────────────────────────
+# Mounted as a bind-mount volume at runtime.
+# Never bake a stale DB snapshot into the image.
+chroma_db/
+
+# ── HuggingFace model cache ────────────────────────────────
+# Mounted as a named volume — excluded from build context.
+.cache/
+
+# ── Secrets ────────────────────────────────────────────────
+.env
+
+# ── Evaluation / calibration scripts ──────────────────────
+# These run on the host against the live API, not inside
+# the container, so there's no reason to copy them in.
+evaluate_rag.py
+evaluate_ragas.py
+calibrate_threshold.py
+calibration_results.json
+eval_results.json
+golden_dataset.json
+
+# ── Heroku / legacy deployment artefacts ──────────────────
+Procfile
+runtime.txt
+
+# ── Editor / OS noise ─────────────────────────────────────
+.git/
+.github/
+.gitignore
+.DS_Store
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+websites.txt
+debug_retrieval.py
